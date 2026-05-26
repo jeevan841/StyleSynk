@@ -68,7 +68,8 @@ export default function ChatWidget({ onFillBooking }) {
           timestamp: new Date(),
         }]);
       }
-    } catch {
+    } catch (err) {
+      console.error('AI chat error:', err);
       setMessages(prev => [...prev, {
         id: Date.now() + 1,
         role: 'ai-error',
