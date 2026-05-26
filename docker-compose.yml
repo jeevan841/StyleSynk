@@ -1,0 +1,58 @@
+# docker-compose.yml — StyleSynk full-stack deployment
+# Services: postgres + node API + (optionally) nginx
+
+version: '3.9'
+
+services:
+  # ── PostgreSQL ─────────────────────────────────────────────
+  postgres:
+    image: postgres:16-alpine
+    container_name: stylesynk-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER:     ${DB_USER:-stylesynk}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-stylesynk_secret}
+      POSTGRES_DB:       ${DB_NAME:-stylesynk}
+    ports:
+      - "${DB_PORT:-5432}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      # Auto-run schema + seed on first boot
+      - ./server/src/database/schema.sql:/docker-entrypoint-initdb.d/01_schema.sql:ro
+      - ./server/src/database/seed.sql:/docker-entrypoint-initdb.d/02_seed.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-stylesynk} -d ${DB_NAME:-stylesynk}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ── Node.js API ────────────────────────────────────────────
+  api:
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+    container_name: stylesynk-api
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    env_file:
+      - ./server/.env
+    environment:
+      DB_HOST:     postgres       # override host to Docker service name
+      DB_PORT:     5432
+      NODE_ENV:    production
+    ports:
+      - "${API_PORT:-5000}:5000"
+    volumes:
+      # Mount source in development — remove for production image
+      - ./server/src:/app/src:ro
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:5000/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+volumes:
+  postgres_data:
+    driver: local

@@ -1,0 +1,98 @@
+[
+  {
+    "id": "svc-1",
+    "name": "Haircut",
+    "category": "Hair",
+    "duration": 45,
+    "price": 800,
+    "color": "#a855f7"
+  },
+  {
+    "id": "svc-2",
+    "name": "Hair Color",
+    "category": "Hair",
+    "duration": 120,
+    "price": 3500,
+    "color": "#ec4899"
+  },
+  {
+    "id": "svc-3",
+    "name": "Hair Spa",
+    "category": "Hair",
+    "duration": 60,
+    "price": 1500,
+    "color": "#8b5cf6"
+  },
+  {
+    "id": "svc-4",
+    "name": "Blowout",
+    "category": "Hair",
+    "duration": 45,
+    "price": 1200,
+    "color": "#6366f1"
+  },
+  {
+    "id": "svc-5",
+    "name": "Facial",
+    "category": "Skin",
+    "duration": 60,
+    "price": 2000,
+    "color": "#06b6d4"
+  },
+  {
+    "id": "svc-6",
+    "name": "Cleanup",
+    "category": "Skin",
+    "duration": 30,
+    "price": 900,
+    "color": "#0ea5e9"
+  },
+  {
+    "id": "svc-7",
+    "name": "Manicure",
+    "category": "Nails",
+    "duration": 45,
+    "price": 700,
+    "color": "#10b981"
+  },
+  {
+    "id": "svc-8",
+    "name": "Pedicure",
+    "category": "Nails",
+    "duration": 60,
+    "price": 900,
+    "color": "#34d399"
+  },
+  {
+    "id": "svc-9",
+    "name": "Full Body Massage",
+    "category": "Wellness",
+    "duration": 90,
+    "price": 4500,
+    "color": "#f59e0b"
+  },
+  {
+    "id": "svc-10",
+    "name": "Eyebrow Threading",
+    "category": "Brow & Lash",
+    "duration": 15,
+    "price": 200,
+    "color": "#f97316"
+  },
+  {
+    "id": "svc-11",
+    "name": "Waxing (Full Body)",
+    "category": "Waxing",
+    "duration": 90,
+    "price": 2800,
+    "color": "#ef4444"
+  },
+  {
+    "id": "svc-12",
+    "name": "Bridal Package",
+    "category": "Packages",
+    "duration": 300,
+    "price": 15000,
+    "color": "#d946ef"
+  }
+]
