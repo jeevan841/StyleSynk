@@ -10,7 +10,7 @@ const morgan       = require('morgan');
 const rateLimit    = require('express-rate-limit');
 const { Server }   = require('socket.io');
 const { initSocket } = require('./socket');
-const { setIO }    = require('./services/notification');
+const { testConnection, closePool } = require('./config/db');
 
 const app    = express();
 const server = http.createServer(app);
@@ -25,8 +25,6 @@ const io = new Server(server, {
   },
 });
 initSocket(io);
-// Inject io into the notification service for emit-from-service pattern
-setIO(io);
 // Attach io to every request so controllers can emit events
 app.set('io', io);
 
@@ -34,10 +32,51 @@ app.set('io', io);
 // SECURITY MIDDLEWARE
 // ============================================================
 app.use(helmet());
+
+// CORS configuration - support multiple origins
+const allowedOrigins = [
+  process.env.CLIENT_URL,
+  'http://localhost:5173'
+].filter(Boolean);
+
 app.use(cors({
-  origin: process.env.CLIENT_URL || 'http://localhost:5173',
+  origin: (origin, callback) => {
+    // Allow requests with no origin (mobile apps, Postman, etc.)
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
   credentials: true,
 }));
+
+// ============================================================
+// REQUEST TIMEOUT MIDDLEWARE
+// ============================================================
+const timeoutMiddleware = (timeout) => (req, res, next) => {
+  req.setTimeout(timeout);
+  res.setTimeout(timeout);
+  
+  const timeoutId = setTimeout(() => {
+    if (!res.headersSent) {
+      res.status(408).json({
+        success: false,
+        error: 'REQUEST_TIMEOUT',
+        message: 'Request took too long to process'
+      });
+    }
+  }, timeout);
+  
+  res.on('finish', () => clearTimeout(timeoutId));
+  res.on('close', () => clearTimeout(timeoutId));
+  
+  next();
+};
+
+// Default 10 second timeout for all routes
+app.use(timeoutMiddleware(10000));
 
 // ============================================================
 // RATE LIMITING
@@ -75,23 +114,18 @@ if (process.env.NODE_ENV !== 'test') {
 // HEALTH CHECK
 // ============================================================
 app.get('/api/health', async (req, res) => {
-  const { pool } = require('./config/db');
   let dbStatus = 'disconnected';
   try {
-    await pool.query('SELECT 1');
-    dbStatus = 'connected';
-  } catch { /* DB not reachable */ }
+    const connected = await testConnection();
+    dbStatus = connected ? 'connected' : 'disconnected';
+  } catch (error) {
+    dbStatus = 'error';
+  }
 
   res.json({
-    success: true,
-    data: {
-      status: 'ok',
-      timestamp: new Date().toISOString(),
-      service: 'StyleSynk API v1.0',
-      environment: process.env.NODE_ENV,
-      database: dbStatus,
-      ai: process.env.GROQ_API_KEY && process.env.GROQ_API_KEY !== 'your_groq_api_key_here' ? 'groq' : 'mock',
-    },
+    status: 'ok',
+    db: dbStatus,
+    timestamp: new Date().toISOString()
   });
 });
 
@@ -107,7 +141,10 @@ app.use('/api/services',     require('./routes/services'));
 app.use('/api/billing',      require('./routes/billing'));
 app.use('/api/inventory',    require('./routes/inventory'));
 app.use('/api/analytics',    require('./routes/analytics'));
-app.use('/api/ai',           require('./routes/ai'));
+
+// AI route with extended 15 second timeout
+app.use('/api/ai', timeoutMiddleware(15000), require('./routes/ai'));
+
 app.use('/api/notifications',require('./routes/notifications'));
 app.use('/api/customer',     require('./routes/customer'));
 app.use('/api/commissions',  require('./routes/commissions'));
@@ -133,7 +170,19 @@ app.use((err, req, res, next) => {
 });
 
 // ============================================================
-// START
+// VALIDATE REQUIRED ENVIRONMENT VARIABLES
+// ============================================================
+const requiredEnvVars = ['DB_HOST', 'DB_NAME', 'DB_USER', 'DB_PASSWORD', 'JWT_SECRET'];
+const missingVars = requiredEnvVars.filter(varName => !process.env[varName]);
+
+if (missingVars.length > 0) {
+  console.error('❌ Missing required environment variables:', missingVars.join(', '));
+  console.error('Please check your .env file');
+  process.exit(1);
+}
+
+// ============================================================
+// START SERVER
 // ============================================================
 const PORT = process.env.PORT || 5000;
 server.listen(PORT, () => {
@@ -143,4 +192,33 @@ server.listen(PORT, () => {
   console.log('   WS:  Socket.IO ready\n');
 });
 
+// ============================================================
+// GRACEFUL SHUTDOWN HANDLERS
+// ============================================================
+const gracefulShutdown = async (signal) => {
+  console.log(`\n${signal} received, starting graceful shutdown...`);
+  
+  // Stop accepting new connections
+  server.close(async () => {
+    console.log('HTTP server closed');
+    
+    // Close database pool
+    await closePool();
+    
+    console.log('Graceful shutdown complete');
+    process.exit(0);
+  });
+  
+  // Force shutdown after 30 seconds
+  setTimeout(() => {
+    console.error('Forced shutdown after timeout');
+    process.exit(1);
+  }, 30000);
+};
+
+process.on('SIGTERM', () => gracefulShutdown('SIGTERM'));
+process.on('SIGINT', () => gracefulShutdown('SIGINT'));
+
 module.exports = { app, server, io };
+
+// Made with Bob
