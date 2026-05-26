@@ -48,8 +48,7 @@ export default function ChatWidget({ onFillBooking }) {
     setLoading(true);
 
     try {
-      const res = await aiAPI.parseBooking(msg);
-      const data = res.data;
+      const data = await aiAPI.parseBooking(msg);
 
       if (data.error === 'not_a_booking_request') {
         setMessages(prev => [...prev, {
@@ -64,7 +63,6 @@ export default function ChatWidget({ onFillBooking }) {
           role: 'ai',
           content: `✅ Got it! Here's what I extracted:`,
           parsed: data,
-          mode: res.mode,
           timestamp: new Date(),
         }]);
       }
