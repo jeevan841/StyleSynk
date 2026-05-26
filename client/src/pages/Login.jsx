@@ -6,20 +6,20 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
 const DEMO_ACCOUNTS = [
-  { role: 'Owner',           email: 'owner@stylesynk.com',           password: 'Password123!', color: '#a78bfa' },
-  { role: 'Branch Manager',  email: 'manager.banjara@stylesynk.com', password: 'Password123!', color: '#34d399' },
-  { role: 'Receptionist',    email: 'recep.banjara@stylesynk.com',   password: 'Password123!', color: '#60a5fa' },
+  { role: 'Owner', email: 'owner@stylesynk.com', password: 'Password123!', color: '#a78bfa' },
+  { role: 'Branch Manager', email: 'manager.banjara@stylesynk.com', password: 'Password123!', color: '#34d399' },
+  { role: 'Receptionist', email: 'recep.banjara@stylesynk.com', password: 'Password123!', color: '#60a5fa' },
 ];
 
 export default function Login() {
-  const [email,    setEmail]    = useState('');
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [error,    setError]    = useState('');
-  const [loading,  setLoading]  = useState(false);
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
   const { login } = useAuth();
-  const navigate  = useNavigate();
-  const location  = useLocation();
-  const from      = location.state?.from?.pathname || '/';
+  const navigate = useNavigate();
+  const location = useLocation();
+  const from = location.state?.from?.pathname || '/';
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -118,10 +118,6 @@ export default function Login() {
             )}
           </button>
         </form>
-
-        <p className="login-hint">
-          Default password: <code>Password123!</code>
-        </p>
       </div>
     </div>
   );
