@@ -13,6 +13,7 @@ const { initSocket } = require('./socket');
 const { testConnection, closePool } = require('./config/db');
 
 const app    = express();
+app.set('trust proxy', 1);
 const server = http.createServer(app);
 
 // ============================================================
@@ -93,7 +94,7 @@ app.use('/api/', limiter);
 // Stricter limiter for auth routes
 const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  max: 20,
+  max: 100,
   message: { success: false, error: 'Too many auth attempts, please wait.' },
 });
 
