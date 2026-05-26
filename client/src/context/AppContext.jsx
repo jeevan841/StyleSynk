@@ -1,4 +1,5 @@
 import { createContext, useContext, useReducer, useEffect } from 'react';
+import { useAuth } from './AuthContext';
 import { appointmentsAPI, branchesAPI, staffAPI, customersAPI, servicesAPI } from '../api';
 
 const AppContext = createContext(null);
@@ -32,6 +33,7 @@ function reducer(state, action) {
 
 export function AppProvider({ children }) {
   const [state, dispatch] = useReducer(reducer, initialState);
+  const { isAuthenticated } = useAuth();
 
   const fetchData = async (key, fn) => {
     dispatch({ type: 'SET_LOADING', key, value: true });
@@ -46,12 +48,13 @@ export function AppProvider({ children }) {
   };
 
   useEffect(() => {
+    if (!isAuthenticated) return;
     fetchData('appointments', appointmentsAPI.getAll);
     fetchData('branches', branchesAPI.getAll);
     fetchData('staff', staffAPI.getAll);
     fetchData('clients', customersAPI.getAll);
     fetchData('services', servicesAPI.getAll);
-  }, []);
+  }, [isAuthenticated]);
 
 
   const actions = {
@@ -84,3 +87,4 @@ export const useApp = () => {
   if (!ctx) throw new Error('useApp must be used inside AppProvider');
   return ctx;
 };
+// auth guard active
