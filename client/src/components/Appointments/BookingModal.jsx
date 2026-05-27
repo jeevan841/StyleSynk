@@ -107,13 +107,37 @@ export default function BookingModal({ appointment, onClose }) {
     setSaving(true);
     setError('');
     try {
+      // Resolve IDs from names
+      const branchObj = state.branches?.find(b => b.name === form.branch);
+      const serviceObj = state.services?.find(s => s.name === form.service);
+      const staffObj = state.staff?.find(s => s.name === form.stylist);
+
+      const date = form.date;
+      const time = form.time || '10:00';
+      const start_time = new Date(`${date}T${time}:00+05:30`).toISOString();
+      const duration = form.duration || serviceObj?.duration_min || 30;
+      const end = new Date(new Date(start_time).getTime() + duration * 60000);
+      const end_time = end.toISOString();
+
+      const payload = {
+        branch_id: branchObj?.id || state.branches?.[0]?.id,
+        service_id: serviceObj?.id,
+        staff_id: staffObj?.id || null,
+        start_time,
+        end_time,
+        notes: form.notes || '',
+        status: form.status || 'pending',
+        customer_name: form.clientName,
+        customer_phone: form.phone || '',
+      };
+
       if (isEdit) {
-        await updateAppointment(appointment.id, form);
+        await updateAppointment(appointment.id, payload);
       } else {
-        await createAppointment({ ...form, price: Number(form.price), duration: Number(form.duration) });
+        await createAppointment(payload);
       }
       onClose();
-    } catch {
+    } catch (err) {
       setError('Failed to save appointment. Please try again.');
     } finally {
       setSaving(false);
