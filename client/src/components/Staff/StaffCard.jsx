@@ -40,7 +40,7 @@ export default function StaffCard({ staff }) {
           Revenue this month
         </div>
         <div style={{ fontFamily: 'Plus Jakarta Sans, sans-serif', fontSize: 20, fontWeight: 800, color: staff.color }}>
-          ₹{staff.revenue.toLocaleString('en-IN')}
+          ₹{( staff.revenue || 0).toLocaleString('en-IN')}
         </div>
         <div className="progress-bar" style={{ marginTop: 6 }}>
           <div className="progress-fill" style={{ width: `${Math.min((staff.revenue / 130000) * 100, 100)}%`, background: staff.color }} />
