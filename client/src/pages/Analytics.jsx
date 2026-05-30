@@ -1,7 +1,7 @@
 // client/src/pages/Analytics.jsx
 // Full analytics dashboard with Recharts charts
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, startTransition } from 'react';
 import { analyticsAPI } from '../api';
 import {
   AreaChart, Area, BarChart, Bar, XAxis, YAxis, CartesianGrid,
@@ -37,7 +37,6 @@ export default function Analytics() {
   const [loading,    setLoading]    = useState(true);
 
   useEffect(() => {
-    setLoading(true);
     Promise.all([
       analyticsAPI.overview({ days }),
       analyticsAPI.revenueChart({ days }),
@@ -50,8 +49,9 @@ export default function Analytics() {
       setApptChart(ac || []);
       setBranchPerf(bp || []);
       setSvcPop(sp || []);
-    }).catch(console.error)
-      .finally(() => setLoading(false));
+      setLoading(false);
+    }).catch(console.error);
+    startTransition(() => setLoading(true));
   }, [days]);
 
   if (loading) {

@@ -11,7 +11,6 @@ export default function POS() {
   const [customers, setCustomers] = useState([]);
   const [services,  setServices]  = useState([]);
   const [staff,     setStaff]     = useState([]);
-  const [bills,     setBills]     = useState([]);
 
   const [selectedCustomer, setSelectedCustomer] = useState('');
   const [selectedService,  setSelectedService]  = useState('');
@@ -30,12 +29,10 @@ export default function POS() {
       customersAPI.getAll({ limit: 200 }),
       servicesAPI.getAll(),
       staffAPI.getAll(),
-      billingAPI.getAll({ status: 'draft', limit: 20 }),
-    ]).then(([c, s, st, b]) => {
+    ]).then(([c, s, st]) => {
       setCustomers(c || []);
       setServices(s || []);
       setStaff(st || []);
-      setBills(b || []);
     }).catch(console.error);
   }, []);
 

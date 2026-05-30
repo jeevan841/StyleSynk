@@ -54,5 +54,5 @@ export function useSocket() {
     if (socket) socket.emit(event, data);
   }, []);
 
-  return { on, emit, socket: socketRef.current };
+  return { on, emit };
 }

@@ -8,7 +8,6 @@ import { useAuth } from '../context/AuthContext';
 export default function Calendar() {
   const { user } = useAuth();
   const [view, setView] = useState('day');
-  const [staffFilter, setStaffFilter] = useState('');
 
   return (
     <div className="page-calendar">

@@ -1,10 +1,10 @@
 // client/src/pages/Customers.jsx
 // Customer management — list, search, loyalty, membership details
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, startTransition } from 'react';
 import { customersAPI } from '../api';
 import { formatINR } from '../utils/formatCurrency';
-import { formatDate, relativeTime } from '../utils/formatDate';
+import { formatDate } from '../utils/formatDate';
 import { useAuth } from '../context/AuthContext';
 
 const MEMBERSHIP_COLORS = {
@@ -51,15 +51,17 @@ function CustomerDrawer({ customer, onClose }) {
 
   useEffect(() => {
     if (!customer) return;
-    setLoadingHistory(true);
     // Fetch appointment history for this customer
+    const controller = new AbortController();
     fetch(`/api/appointments?customer_id=${customer.id}&limit=20`, {
       headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
+      signal: controller.signal,
     })
       .then(r => r.json())
-      .then(r => setHistory(r.data || []))
-      .catch(() => {})
-      .finally(() => setLoadingHistory(false));
+      .then(r => { setLoadingHistory(false); setHistory(r.data || []); })
+      .catch(() => setLoadingHistory(false));
+    startTransition(() => setLoadingHistory(true));
+    return () => controller.abort();
   }, [customer]);
 
   if (!customer) return null;
@@ -133,11 +135,10 @@ export default function Customers() {
   const [filter,    setFilter]    = useState('all'); // all | silver | gold | platinum
 
   useEffect(() => {
-    setLoading(true);
     customersAPI.getAll({ branch_id: user?.branch_id, search })
-      .then(data => setCustomers(Array.isArray(data) ? data : []))
-      .catch(console.error)
-      .finally(() => setLoading(false));
+      .then(data => { setLoading(false); setCustomers(Array.isArray(data) ? data : []); })
+      .catch(console.error);
+    startTransition(() => setLoading(true));
   }, [search, user?.branch_id]);
 
   const filtered = customers.filter(c => {

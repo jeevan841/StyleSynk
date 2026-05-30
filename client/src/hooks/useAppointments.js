@@ -1,7 +1,7 @@
 // client/src/hooks/useAppointments.js
 // Reactive appointments hook — fetches, filters, and subscribes to Socket.IO updates
 
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback, useRef, startTransition } from 'react';
 import { appointmentsAPI } from '../api';
 import { useSocket } from './useSocket';
 
@@ -34,7 +34,7 @@ export function useAppointments(filters = {}) {
   // Initial fetch
   useEffect(() => {
     filtersRef.current = filters;
-    fetch();
+    startTransition(() => fetch());
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [JSON.stringify(filters)]);
 

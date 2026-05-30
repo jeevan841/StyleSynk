@@ -137,7 +137,8 @@ export default function BookingModal({ appointment, onClose }) {
         await createAppointment(payload);
       }
       onClose();
-    } catch (err) {
+    // eslint-disable-next-line no-unused-vars
+    } catch (_err) {
       setError('Failed to save appointment. Please try again.');
     } finally {
       setSaving(false);

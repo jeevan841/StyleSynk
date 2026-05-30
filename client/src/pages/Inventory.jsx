@@ -1,7 +1,7 @@
 // client/src/pages/Inventory.jsx
 // Per-branch inventory management with low-stock alerts
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, startTransition } from 'react';
 import { inventoryAPI } from '../api';
 import { useSocket } from '../hooks/useSocket';
 
@@ -12,15 +12,12 @@ export default function Inventory() {
   const [search,  setSearch]  = useState('');
   const { on } = useSocket();
 
-  const load = () => {
-    setLoading(true);
+  useEffect(() => {
     inventoryAPI.getAll(filter === 'low' ? { low_stock: true } : {})
-      .then(data => setItems(data || []))
-      .catch(console.error)
-      .finally(() => setLoading(false));
-  };
-
-  useEffect(() => { load(); }, [filter]); // eslint-disable-line react-hooks/exhaustive-deps
+      .then(data => { setLoading(false); setItems(data || []); })
+      .catch(console.error);
+    startTransition(() => setLoading(true));
+  }, [filter]);
 
   // Real-time low-stock alerts
   useEffect(() => {
