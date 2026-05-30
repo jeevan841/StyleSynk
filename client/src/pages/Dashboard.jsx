@@ -1,4 +1,5 @@
 import { useApp } from '../context/AppContext';
+import { useAuth } from '../context/AuthContext';
 import StatsCard from '../components/Dashboard/StatsCard';
 import RevenueChart from '../components/Dashboard/RevenueChart';
 import RecentAppointments from '../components/Dashboard/RecentAppointments';
@@ -6,7 +7,11 @@ import ServiceBreakdown from '../components/Dashboard/ServiceBreakdown';
 
 export default function Dashboard() {
   const { state } = useApp();
+  const { user } = useAuth();
   const { appointments, branches, staff, clients } = state;
+
+  // Derive first name from full name (e.g. "Ananya Sharma" → "Ananya")
+  const firstName = user?.name?.split(' ')[0] || user?.email?.split('@')[0] || 'there';
 
   const todayStr = new Date().toISOString().split('T')[0];
   const todayAppts = appointments.filter(a => a.date === todayStr);
@@ -28,10 +33,10 @@ export default function Dashboard() {
       }}>
         <div>
           <div style={{ fontFamily: 'Plus Jakarta Sans', fontSize: 24, fontWeight: 800, color: 'var(--text-primary)' }}>
-            Good {new Date().getHours() < 12 ? 'Morning' : new Date().getHours() < 17 ? 'Afternoon' : 'Evening'}, Ananya! 👋
+            Good {new Date().getHours() < 12 ? 'Morning' : new Date().getHours() < 17 ? 'Afternoon' : 'Evening'}, {firstName}! 👋
           </div>
           <div style={{ color: 'var(--text-secondary)', fontSize: 14, marginTop: 4 }}>
-            Here's what's happening across all 4 branches today.
+            Here's what's happening across all {branches.length || ''} branch{branches.length !== 1 ? 'es' : ''} today.
           </div>
         </div>
         <div style={{ textAlign: 'right' }}>

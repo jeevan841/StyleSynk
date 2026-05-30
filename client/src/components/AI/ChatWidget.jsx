@@ -80,8 +80,12 @@ export default function ChatWidget({ onFillBooking }) {
   };
 
   const handleFill = (parsed) => {
-    window.dispatchEvent(new CustomEvent('ai-fill-booking', { detail: parsed }));
-    window.dispatchEvent(new CustomEvent('open-booking'));
+    // Open the modal FIRST so BookingModal mounts and attaches its listener,
+    // then fire the fill event on the next tick once the component is live.
+    window.dispatchEvent(new CustomEvent('open-booking', { detail: parsed }));
+    setTimeout(() => {
+      window.dispatchEvent(new CustomEvent('ai-fill-booking', { detail: parsed }));
+    }, 0);
     onFillBooking?.();
     setMessages(prev => [...prev, {
       id: Date.now(),

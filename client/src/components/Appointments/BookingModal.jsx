@@ -37,55 +37,55 @@ export default function BookingModal({ appointment, onClose }) {
   const { createAppointment, updateAppointment, state } = useApp();
   const isEdit = !!appointment;
 
-  const [form, setForm] = useState(isEdit ? { ...appointment } : { ...EMPTY_FORM, ...state.prefillData });
+  // Translate AI snake_case keys → form camelCase keys
+  const mapPrefill = useCallback((d) => {
+    if (!d) return {};
+    const today = new Date();
+    const resolveD = (v) => {
+      if (!v) return '';
+      const lower = v.toLowerCase();
+      if (lower === 'today') return today.toISOString().split('T')[0];
+      if (lower === 'tomorrow') { const t = new Date(today); t.setDate(t.getDate() + 1); return t.toISOString().split('T')[0]; }
+      return v;
+    };
+    const resolveT = (v) => {
+      if (!v) return '';
+      const m = v.match(/(\d{1,2})(?::(\d{2}))?\s*(am|pm)/i);
+      if (!m) return '';
+      let h = parseInt(m[1]); const min = m[2] || '00'; const ampm = m[3].toUpperCase();
+      if (ampm === 'PM' && h < 12) h += 12;
+      if (ampm === 'AM' && h === 12) h = 0;
+      return `${String(h).padStart(2, '0')}:${min}`;
+    };
+    return {
+      ...(d.customer_name  && { clientName: d.customer_name }),
+      ...(d.phone          && { phone: d.phone }),
+      ...(d.service        && { service: d.service, price: SERVICE_PRICES[d.service] || '', duration: SERVICE_DURATIONS[d.service] || '' }),
+      ...(d.date           && { date: resolveD(d.date) }),
+      ...(d.time           && { time: resolveT(d.time) }),
+      ...(d.branch         && { branch: d.branch }),
+      ...(d.stylist_preference && { stylist: d.stylist_preference }),
+      ...(d.notes          && { notes: d.notes }),
+    };
+  }, []);
+
+  const [form, setForm] = useState(() => {
+    if (isEdit) return { ...appointment };
+    return { ...EMPTY_FORM, ...mapPrefill(state.prefillData) };
+  });
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
 
-  // Wrapped in useCallback so references are stable for useEffect deps
-  const resolveDate = useCallback((d) => {
-    if (!d) return '';
-    const lower = d.toLowerCase();
-    const today = new Date();
-    if (lower === 'today') return today.toISOString().split('T')[0];
-    if (lower === 'tomorrow') {
-      const t = new Date(today); t.setDate(t.getDate() + 1);
-      return t.toISOString().split('T')[0];
-    }
-    return d;
-  }, []);
 
-  // Wrapped in useCallback so references are stable for useEffect deps
-  const resolveTime = useCallback((t) => {
-    if (!t) return '';
-    const m = t.match(/(\d{1,2})(?::(\d{2}))?\s*(am|pm)/i);
-    if (!m) return '';
-    let h = parseInt(m[1]); const min = m[2] || '00'; const ampm = m[3].toUpperCase();
-    if (ampm === 'PM' && h < 12) h += 12;
-    if (ampm === 'AM' && h === 12) h = 0;
-    return `${String(h).padStart(2, '0')}:${min}`;
-  }, []);
-
-  // Listen for AI fill events
+  // Listen for AI fill events (fired after the modal mounts via setTimeout in ChatWidget)
   useEffect(() => {
     const handler = (e) => {
-      const d = e.detail;
-      setForm(prev => ({
-        ...prev,
-        clientName: d.customer_name || prev.clientName,
-        phone: d.phone || prev.phone,
-        service: d.service || prev.service,
-        date: resolveDate(d.date) || prev.date,
-        time: resolveTime(d.time) || prev.time,
-        branch: d.branch || prev.branch,
-        stylist: d.stylist_preference || prev.stylist,
-        notes: d.notes || prev.notes,
-        price: d.service ? SERVICE_PRICES[d.service] || '' : prev.price,
-        duration: d.service ? SERVICE_DURATIONS[d.service] || '' : prev.duration,
-      }));
+      setForm(prev => ({ ...prev, ...mapPrefill(e.detail) }));
     };
     window.addEventListener('ai-fill-booking', handler);
     return () => window.removeEventListener('ai-fill-booking', handler);
-  }, [resolveDate, resolveTime]);
+  }, [mapPrefill]);
+
 
   const handleChange = (e) => {
     const { name, value } = e.target;

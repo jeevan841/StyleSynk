@@ -25,14 +25,20 @@ import { useEffect, useState } from 'react';
 import { useApp } from './context/AppContext';
 
 function BookingModalController() {
-  const { state, closeBooking } = useApp();
+  const { state, closeBooking, openBooking } = useApp();
   const [eventOpen, setEventOpen] = useState(false);
 
   useEffect(() => {
-    const handler = () => setEventOpen(true);
+    const handler = (e) => {
+      // If the event carries AI prefill data, push it into AppContext too
+      if (e.detail && Object.keys(e.detail).length > 0) {
+        openBooking(e.detail);
+      }
+      setEventOpen(true);
+    };
     window.addEventListener('open-booking', handler);
     return () => window.removeEventListener('open-booking', handler);
-  }, []);
+  }, [openBooking]);
 
   const isOpen = eventOpen || state.bookingModalOpen;
   if (!isOpen) return null;
