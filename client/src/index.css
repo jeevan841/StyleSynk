@@ -5,6 +5,20 @@
    ============================================================ */
 
 :root {
+  /* Gold & Black Theme */
+  --color-primary: #d4a017;
+  --color-primary-hover: #f0c040;
+  --color-primary-light: rgba(212,160,23,0.15);
+  --bg-base: #0a0a0a;
+  --bg-card: #141414;
+  --bg-elevated: #1a1a1a;
+  --border-default: rgba(212,160,23,0.2);
+  --border-strong: rgba(212,160,23,0.4);
+  --text-primary: #f5f0e8;
+  --text-secondary: #c9b99a;
+  --text-muted: #8a7560;
+  --sidebar-bg: #0d0d0d;
+  --sidebar-border: rgba(212,160,23,0.15);
   /* Brand Colors */
   --brand-primary: #a855f7;
   --brand-primary-light: #c084fc;
