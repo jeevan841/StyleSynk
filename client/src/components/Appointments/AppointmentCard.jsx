@@ -34,11 +34,11 @@ export default function AppointmentCard({ appointment, onEdit }) {
   };
 
   const handleDelete = async () => {
-    if (!confirm(`Delete appointment for ${appointment.clientName}?`)) return;
+    if (!confirm(`Delete appointment for ${appointment.customer_name || appointment.clientName}?`)) return;
     await deleteAppointment(appointment.id);
   };
 
-  const initials = appointment.clientName?.split(' ').map(n => n[0]).join('').slice(0, 2) || '??';
+  const initials = appointment.customer_name || appointment.clientName?.split(' ').map(n => n[0]).join('').slice(0, 2) || '??';
 
   return (
     <div className="appointment-card" style={{ opacity: loading ? 0.7 : 1 }}>
@@ -57,7 +57,7 @@ export default function AppointmentCard({ appointment, onEdit }) {
 
       {/* Info */}
       <div className="appt-info">
-        <div className="appt-client">{appointment.clientName}</div>
+        <div className="appt-client">{appointment.customer_name || appointment.clientName}</div>
         <div className="appt-service">{appointment.service}</div>
         <div className="appt-meta">
           <span className="appt-meta-item">🏢 {appointment.branch}</span>
