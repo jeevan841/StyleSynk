@@ -7,7 +7,7 @@ import { useAuth } from '../context/AuthContext';
 
 const DEMO_ACCOUNTS = [
   { role: 'Owner',          email: 'owner@stylesynk.com',           password: 'Password123!', color: '#a78bfa' },
-  { role: 'Branch Manager', email: 'manager.banjara@stylesynk.com', password: 'Password123!', color: '#34d399' },
+  { role: 'Manager',        email: 'manager.banjara@stylesynk.com', password: 'Password123!', color: '#34d399' },
   { role: 'Receptionist',   email: 'recep.banjara@stylesynk.com',   password: 'Password123!', color: '#60a5fa' },
 ];
 
