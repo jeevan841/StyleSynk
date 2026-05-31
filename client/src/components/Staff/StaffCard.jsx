@@ -4,16 +4,16 @@ export default function StaffCard({ staff }) {
 
   return (
     <div className="staff-card" style={{ '--staff-color': staff.color }}>
-      <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 3, background: staff.color, borderRadius: 'var(--radius-xl) var(--radius-xl) 0 0', opacity: 0.8 }} />
+      <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 3, background: staff.color || "#a855f7", borderRadius: 'var(--radius-xl) var(--radius-xl) 0 0', opacity: 0.8 }} />
 
       <div className="staff-card-header">
-        <div className="avatar avatar-lg" style={{ background: staff.color + '30', color: staff.color, border: `2px solid ${staff.color}40` }}>
+        <div className="avatar avatar-lg" style={{ background: staff.color || "#a855f7" + '30', color: staff.color, border: `2px solid ${staff.color}40` }}>
           {staff.avatar}
         </div>
         <div style={{ flex: 1, minWidth: 0 }}>
           <div className="staff-name">{staff.name}</div>
           <div className="staff-role">{staff.role}</div>
-          <div className="staff-branch-tag" style={{ background: staff.color + '18', color: staff.color, border: `1px solid ${staff.color}30` }}>
+          <div className="staff-branch-tag" style={{ background: staff.color || "#a855f7" + '18', color: staff.color, border: `1px solid ${staff.color}30` }}>
             🏢 {staff.branch}
           </div>
         </div>
@@ -30,7 +30,7 @@ export default function StaffCard({ staff }) {
           <div className="staff-stat-label">Today</div>
         </div>
         <div className="staff-stat">
-          <div className="staff-stat-value">{(staff.totalAppointments / 1000).toFixed(1)}k</div>
+          <div className="staff-stat-value">{(( staff.totalAppointments || 0) / 1000).toFixed(1)}k</div>
           <div className="staff-stat-label">Total</div>
         </div>
       </div>
@@ -43,12 +43,12 @@ export default function StaffCard({ staff }) {
           ₹{( staff.revenue || 0).toLocaleString('en-IN')}
         </div>
         <div className="progress-bar" style={{ marginTop: 6 }}>
-          <div className="progress-fill" style={{ width: `${Math.min((staff.revenue / 130000) * 100, 100)}%`, background: staff.color }} />
+          <div className="progress-fill" style={{ width: `${Math.min((( staff.revenue || 0) / 130000) * 100, 100)}%`, background: staff.color || "#a855f7" }} />
         </div>
       </div>
 
       <div className="specialties">
-        {staff.specialties.map(s => (
+        {( staff.specialties || []).map(s => (
           <span key={s} className="specialty-tag">{s}</span>
         ))}
       </div>
