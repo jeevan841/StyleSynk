@@ -71,7 +71,6 @@ export default function Branches() {
           {branches.map(b => <BranchCard key={b.id} branch={b} />)}
         </div>
       )}
-    </div>
       {showModal && (
         <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 }}>
           <div style={{ background: 'var(--bg-card)', borderRadius: 'var(--radius-xl)', padding: 32, width: 400, border: '1px solid var(--border-default)' }}>
