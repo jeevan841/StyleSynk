@@ -249,6 +249,9 @@ export default function POS() {
                 <div className={`pos-msg ${message.startsWith('✅') ? 'success' : 'error'}`}>{message}</div>
               )}
 
+              {(paymentMethod === 'upi' || paymentMethod === 'card' || paymentMethod === 'wallet') && (
+                <a href="https://razorpay.me/@pallejeevan" target="_blank" rel="noopener noreferrer" style={{ display: 'block', textAlign: 'center', background: '#2563eb', borderRadius: 8, color: '#fff', textDecoration: 'none', fontWeight: 700, padding: '12px', marginBottom: 8 }}>💳 Pay via Razorpay</a>
+              )}
               <button
                 onClick={handleCloseBill}
                 disabled={loading || cart.length === 0}
