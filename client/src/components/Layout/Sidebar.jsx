@@ -21,6 +21,9 @@ const NAV_ITEMS = [
 /** Returns true when the nav item should be visible for the given role. */
 const isVisible = (item, role) => !item.roles || item.roles.includes(role);
 
+/** Human-readable label for each role value. */
+const ROLE_LABELS = { owner: 'Owner', branch_manager: 'Manager', receptionist: 'Receptionist' };
+
 export default function Sidebar() {
   const { state } = useApp();
   const { user, logout } = useAuth();
@@ -102,7 +105,7 @@ export default function Sidebar() {
           <div className="user-avatar">{initials}</div>
           <div className="user-info">
             <div className="user-name">{user?.name || 'User'}</div>
-            <div className="user-role">{user?.role?.replace('_', ' ')}</div>
+            <div className="user-role">{ROLE_LABELS[user?.role] ?? user?.role}</div>
           </div>
           <button
             onClick={logout}
