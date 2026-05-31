@@ -10,13 +10,16 @@ const NAV_ITEMS = [
   { path: '/appointments',icon: '📅', label: 'Appointments', section: 'main' },
   { path: '/calendar',    icon: '🗓️', label: 'Calendar',     section: 'main' },
   { path: '/customers',   icon: '👥', label: 'Customers',    section: 'main' },
-  { path: '/staff',       icon: '✂️', label: 'Staff',        section: 'main' },
+  { path: '/staff',       icon: '✂️', label: 'Staff',        section: 'main', roles: ['owner', 'branch_manager'] },
   { path: '/ai',          icon: '🤖', label: 'AI Assistant', section: 'main' },
   { path: '/pos',         icon: '💳', label: 'POS / Billing',section: 'ops'  },
-  { path: '/inventory',   icon: '📦', label: 'Inventory',    section: 'ops'  },
-  { path: '/analytics',   icon: '📊', label: 'Analytics',    section: 'ops'  },
-  { path: '/branches',    icon: '🏢', label: 'Branches',     section: 'admin'},
+  { path: '/inventory',   icon: '📦', label: 'Inventory',    section: 'ops',  roles: ['owner', 'branch_manager'] },
+  { path: '/analytics',   icon: '📊', label: 'Analytics',    section: 'ops',  roles: ['owner', 'branch_manager'] },
+  { path: '/branches',    icon: '🏢', label: 'Branches',     section: 'admin', roles: ['owner'] },
 ];
+
+/** Returns true when the nav item should be visible for the given role. */
+const isVisible = (item, role) => !item.roles || item.roles.includes(role);
 
 export default function Sidebar() {
   const { state } = useApp();
@@ -39,7 +42,7 @@ export default function Sidebar() {
       {/* Navigation */}
       <nav className="sidebar-nav">
         <span className="sidebar-section-label">Main Menu</span>
-        {NAV_ITEMS.filter(i => i.section === 'main').map(item => (
+        {NAV_ITEMS.filter(i => i.section === 'main' && isVisible(i, user?.role)).map(item => (
           <NavLink
             key={item.path}
             to={item.path}
@@ -55,7 +58,7 @@ export default function Sidebar() {
         ))}
 
         <span className="sidebar-section-label">Operations</span>
-        {NAV_ITEMS.filter(i => i.section === 'ops').map(item => (
+        {NAV_ITEMS.filter(i => i.section === 'ops' && isVisible(i, user?.role)).map(item => (
           <NavLink
             key={item.path}
             to={item.path}
@@ -66,10 +69,10 @@ export default function Sidebar() {
           </NavLink>
         ))}
 
-        {user?.role === 'owner' && (
+        {NAV_ITEMS.filter(i => i.section === 'admin' && isVisible(i, user?.role)).length > 0 && (
           <>
             <span className="sidebar-section-label">Admin</span>
-            {NAV_ITEMS.filter(i => i.section === 'admin').map(item => (
+            {NAV_ITEMS.filter(i => i.section === 'admin' && isVisible(i, user?.role)).map(item => (
               <NavLink
                 key={item.path}
                 to={item.path}
