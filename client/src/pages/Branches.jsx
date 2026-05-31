@@ -1,9 +1,29 @@
+import { useState } from 'react';
 import { useApp } from '../context/AppContext';
+import { branchesAPI } from '../api';
 import BranchCard from '../components/Branches/BranchCard';
 
 export default function Branches() {
   const { state } = useApp();
   const { branches } = state;
+
+  const [showModal, setShowModal] = useState(false);
+  const [form, setForm] = useState({ name: '', address: '', phone: '' });
+  const [saving, setSaving] = useState(false);
+
+  const handleAdd = async () => {
+    if (!form.name || !form.address) return;
+    setSaving(true);
+    try {
+      await branchesAPI.create(form);
+      window.location.reload();
+    } catch (e) {
+      alert('Failed to add branch');
+    } finally {
+      setSaving(false);
+      setShowModal(false);
+    }
+  };
 
   const totalRevenue = branches.reduce((s, b) => s + b.monthlyRevenue, 0);
   const totalStaff = branches.reduce((s, b) => s + b.totalStaff, 0);
@@ -19,6 +39,7 @@ export default function Branches() {
           <h1 className="page-title">Branches</h1>
           <div className="page-subtitle">All Hyderabad locations</div>
         </div>
+        <button className="btn btn-primary" onClick={() => setShowModal(true)}>➕ Add Branch</button>
       </div>
 
       {/* Summary strip */}
@@ -48,6 +69,23 @@ export default function Branches() {
       ) : (
         <div className="branch-grid">
           {branches.map(b => <BranchCard key={b.id} branch={b} />)}
+        </div>
+      )}
+    </div>
+      {showModal && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 }}>
+          <div style={{ background: 'var(--bg-card)', borderRadius: 'var(--radius-xl)', padding: 32, width: 400, border: '1px solid var(--border-default)' }}>
+            <h2 style={{ marginBottom: 24 }}>Add New Branch</h2>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+              <input className="form-input" placeholder="Branch Name *" value={form.name} onChange={e => setForm(p => ({ ...p, name: e.target.value }))} />
+              <input className="form-input" placeholder="Address *" value={form.address} onChange={e => setForm(p => ({ ...p, address: e.target.value }))} />
+              <input className="form-input" placeholder="Phone" value={form.phone} onChange={e => setForm(p => ({ ...p, phone: e.target.value }))} />
+            </div>
+            <div style={{ display: 'flex', gap: 12, marginTop: 24 }}>
+              <button className="btn btn-primary" onClick={handleAdd} disabled={saving} style={{ flex: 1 }}>{saving ? 'Saving...' : 'Add Branch'}</button>
+              <button className="btn btn-secondary" onClick={() => setShowModal(false)} style={{ flex: 1 }}>Cancel</button>
+            </div>
+          </div>
         </div>
       )}
     </div>
